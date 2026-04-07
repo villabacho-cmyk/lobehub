@@ -25,18 +25,12 @@ const nextConfig = defineConfig({
   // --- NEU: RADIKALE SPEICHER-OPTIMIERUNG ---
   webpack: (config, { isServer }) => {
     if (isVercel) {
-      config.optimization.minimize = true; // Minimierung anlassen, aber...
-      config.devtool = false; // Absolut keine Source Maps generieren
+      config.optimization.minimize = true;
+      config.devtool = false;
+      config.parallelism = 1;
       
-      // Begrenzt die parallele Verarbeitung innerhalb von Webpack
-      config.parallelism = 1; 
-      
-      // Verhindert, dass Webpack zu viele Chunks gleichzeitig im Speicher hält
-      config.optimization.splitChunks = {
-        chunks: 'all',
-        maxInitialRequests: 1,
-        minSize: 100000, 
-      };
+      // Das hier verhindert, dass er versucht, den Code in zu viele kleine Teile zu zerlegen
+      config.optimization.splitChunks = false; 
     }
     return config;
   },
