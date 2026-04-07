@@ -3,7 +3,6 @@ import { defineConfig } from './src/libs/next/config/define-config';
 const isVercel = !!process.env.VERCEL_ENV;
 
 const vercelConfig = {
-  // Vercel serverless optimization: exclude musl binaries from all routes
   outputFileTracingExcludes: {
     '*': [
       'node_modules/.pnpm/@napi-rs+canvas-*-musl*',
@@ -20,14 +19,31 @@ const vercelConfig = {
 const nextConfig = defineConfig({
   ...(isVercel ? vercelConfig : {}),
   
-  // --- UNSERE OPTIMIERUNG FÜR DEN VERCEL BUILD ---
-  eslint: {
-    ignoreDuringBuilds: true,
+  eslint: { ignoreDuringBuilds: true },
+  typescript: { ignoreBuildErrors: true },
+  
+  // --- NEU: RADIKALE SPEICHER-OPTIMIERUNG ---
+  webpack: (config, { isServer }) => {
+    if (isVercel) {
+      config.optimization.minimize = true; // Minimierung anlassen, aber...
+      config.devtool = false; // Absolut keine Source Maps generieren
+      
+      // Begrenzt die parallele Verarbeitung innerhalb von Webpack
+      config.parallelism = 1; 
+      
+      // Verhindert, dass Webpack zu viele Chunks gleichzeitig im Speicher hält
+      config.optimization.splitChunks = {
+        chunks: 'all',
+        maxInitialRequests: 1,
+        minSize: 100000, 
+      };
+    }
+    return config;
   },
-  typescript: {
-    ignoreBuildErrors: true,
-  },
-  // ----------------------------------------------
+  experimental: {
+    // Hilft Next.js, den Speicher während des Builds besser zu verwalten
+    webpackMemoryOptimizations: true,
+  }
 });
 
 export default nextConfig;
