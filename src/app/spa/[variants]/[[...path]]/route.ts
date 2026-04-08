@@ -94,11 +94,11 @@ async function getTemplate(isMobile: boolean): Promise<string> {
   }
 
   // VERCEL FIX: Wir kommentieren den fehlerhaften Import aus
-  // const { desktopHtmlTemplate, mobileHtmlTemplate } = await import('./spaHtmlTemplates');
-  // return isMobile ? mobileHtmlTemplate : desktopHtmlTemplate;
+  const { desktopHtmlTemplate, mobileHtmlTemplate } = await import('./spaHtmlTemplates');
+  return isMobile ? mobileHtmlTemplate : desktopHtmlTemplate;
 
   // Stattdessen geben wir einen Dummy-HTML-String zurück
-  return `<html><head><title>SPA Disabled</title></head><body><h2>Der SPA-Modus ist auf Vercel deaktiviert.</h2><p>Bitte nutze die Standard-URL.</p></body></html>`;
+  // return `<html><head><title>SPA Disabled</title></head><body><h2>Der SPA-Modus ist auf Vercel deaktiviert.</h2><p>Bitte nutze die Standard-URL.</p></body></html>`;
 }
 
 function buildAnalyticsConfig(): AnalyticsConfig {
